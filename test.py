@@ -92,7 +92,6 @@ def test(segmentation_module, loader, gpu):
 
         pbar.update(1)
 
-
 def main(cfg, gpu):
     torch.cuda.set_device(gpu)
 
@@ -201,3 +200,4 @@ if __name__ == '__main__':
         os.makedirs(cfg.TEST.resultComp)
 
     main(cfg, args.gpu)
+
