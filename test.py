@@ -49,8 +49,10 @@ def visualize_result(data, pred, cfg):
 
     img_name = info.split('/')[-1]
     Image.fromarray(im_vis).save(
-        os.path.join(cfg.TEST.result, img_name.replace('.jpg', '.png')))
+        os.path.join(cfg.TEST.resultComp, img_name))
 
+    Image.fromarray(pred_color).save(
+        os.path.join(cfg.TEST.result, img_name))
 
 def test(segmentation_module, loader, gpu):
     segmentation_module.eval()
@@ -185,8 +187,8 @@ if __name__ == '__main__':
         os.path.exists(cfg.MODEL.weights_decoder), "checkpoint does not exitst!"
 
     # generate testing image list
-    if os.path.isdir(args.imgs[0]):
-        imgs = find_recursive(args.imgs[0])
+    if os.path.isdir(args.imgs):
+        imgs = find_recursive(args.imgs, ext='.png')
     else:
         imgs = [args.imgs]
     assert len(imgs), "imgs should be a path to image (.jpg) or directory."
@@ -194,5 +196,8 @@ if __name__ == '__main__':
 
     if not os.path.isdir(cfg.TEST.result):
         os.makedirs(cfg.TEST.result)
+
+    if not os.path.isdir(cfg.TEST.resultComp):
+        os.makedirs(cfg.TEST.resultComp)
 
     main(cfg, args.gpu)
