@@ -4,3 +4,4 @@ ckpt/
 vis/
 log/
 pretrained/
+ade20k-resnet50dilated-ppm_deepsup/*.pth
