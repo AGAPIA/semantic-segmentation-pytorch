@@ -5,4 +5,7 @@ vis/
 log/
 pretrained/
 ade20k-resnet50dilated-ppm_deepsup/*.pth
+TEST_INPUT/
+TEST_OUTPUT/
+TEST_OUTPUTCOMP/
 

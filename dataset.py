@@ -4,7 +4,8 @@ import torch
 from torchvision import transforms
 import numpy as np
 from PIL import Image
-
+from torchvision.transforms import ToTensor, ToPILImage
+import torch.nn.functional as F
 
 def imresize(im, size, interp='bilinear'):
     if interp == 'nearest':
@@ -26,6 +27,9 @@ class BaseDataset(torch.utils.data.Dataset):
         self.imgMaxSize = opt.imgMaxSize
         # max down sampling rate of network to avoid rounding during conv or pooling
         self.padding_constant = opt.padding_constant
+        self.scaleFactor = opt.scaleFactor
+        # Check validity
+        assert (float(int(self.scaleFactor)) == int(self.scaleFactor)), "the scale factor must be integer please "
 
         # parse the input list
         self.parse_input_list(odgt, **kwargs)
@@ -264,6 +268,21 @@ class TestDataset(BaseDataset):
         # load image
         image_path = this_record['fpath_img']
         img = Image.open(image_path).convert('RGB')
+
+        # resize images
+        # to avoid rounding in network
+
+        if self.scaleFactor > 1.0:
+            target_width = int(img.width * (1.0 / self.scaleFactor))
+            target_height = int(img.height * (1.0 / self.scaleFactor))
+            target_width = self.round2nearest_multiple(target_width, self.padding_constant)
+            target_height = self.round2nearest_multiple(target_height, self.padding_constant)
+            img = imresize(img, (target_width, target_height), interp='bilinear')
+
+        #img = Image.open(image_path)
+        #img = ToTensor()(img)
+        #img = F.interpolate(img, scale_factor=2)  # The resize operation on tensor.
+        #ToPILImage()(out).save(image_path, mode='png')
 
         ori_width, ori_height = img.size
 

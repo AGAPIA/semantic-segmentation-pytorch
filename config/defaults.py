@@ -25,6 +25,7 @@ _C.DATASET.padding_constant = 8
 _C.DATASET.segm_downsampling_rate = 8
 # randomly horizontally flip images when train/test
 _C.DATASET.random_flip = True
+_C.DATASET.scaleFactor = 1.0 # How much to scale the original images. This can help GPU mem
 
 # -----------------------------------------------------------------------------
 # Model
@@ -96,3 +97,4 @@ _C.TEST.checkpoint = "epoch_20.pth"
 # folder to output visualization results
 _C.TEST.result = "Results"
 _C.TEST.resultComp = "ResultsComp"
+_C.TEST.saveOnlyLabels = 0
