@@ -105,7 +105,7 @@ class ModelBuilder:
         # encoders are usually pretrained
         # net_encoder.apply(ModelBuilder.weights_init)
         if len(weights) > 0:
-            print('Loading weights for net_encoder')
+            #print('Loading weights for net_encoder')
             net_encoder.load_state_dict(
                 torch.load(weights, map_location=lambda storage, loc: storage), strict=False)
         return net_encoder
@@ -152,7 +152,7 @@ class ModelBuilder:
 
         net_decoder.apply(ModelBuilder.weights_init)
         if len(weights) > 0:
-            print('Loading weights for net_decoder')
+            #print('Loading weights for net_decoder')
             net_decoder.load_state_dict(
                 torch.load(weights, map_location=lambda storage, loc: storage), strict=False)
         return net_decoder

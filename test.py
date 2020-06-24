@@ -6,9 +6,11 @@ from distutils.version import LooseVersion
 import numpy as np
 import torch
 import torch.nn as nn
+import logging
 from scipy.io import loadmat
 import csv
 # Our libs
+
 
 from . dataset import TestDataset
 from . models import ModelBuilder, SegmentationModule
@@ -43,9 +45,9 @@ class SegmentationProxy():
         cfg.merge_from_list(args.opts)
         # cfg.freeze()
 
-        logger = setup_logger(distributed_rank=0)  # TODO
-        logger.info("Loaded configuration file {}".format(args.cfg))
-        logger.info("Running with config:\n{}".format(cfg))
+        self.logger = setup_logger(distributed_rank=0)  # TODO
+        self.logger.info("Loaded configuration file {}".format(args.cfg))
+        self.logger.info("Running with config:\n{}".format(cfg))
 
         cfg.MODEL.arch_encoder = cfg.MODEL.arch_encoder.lower()
         cfg.MODEL.arch_decoder = cfg.MODEL.arch_decoder.lower()
@@ -179,8 +181,8 @@ class SegmentationProxy():
             batch_data = batch_data[0]
             imgPath = batch_data["info"]
             if filterFunctor is not None:
-                if filterFunctor(imgPath, outputFolder):
-                    print(f"Skipping {imgPath[imgPath.rfind('/'):]} already done")
+                if not filterFunctor(imgPath, outputFolder):
+                    self.logger.log(logging.DEBUG, (f"Skipping {imgPath[imgPath.rfind('/'):]} already done or not needed"))
                     continue
 
             segSize = (batch_data['img_ori'].shape[0],
@@ -232,7 +234,7 @@ class SegmentationProxy():
             img = img.transpose((2, 0 ,1))
             img = np.kron(img, np.ones((SF, SF)))
             img = img.transpose((1, 2, 0)).astype(dtype=np.uint8)
-
+        """
         # print predictions in descending order
         pixs = pred.size
         uniques, counts = np.unique(pred, return_counts=True)
@@ -242,7 +244,7 @@ class SegmentationProxy():
             ratio = counts[idx] / pixs * 100
             if ratio > 0.1:
                 print("  {}: {:.2f}%".format(name, ratio))
-
+        """
         # colorize prediction
         pred_color = colorEncode(pred, self.colors).astype(np.uint8)
 
@@ -258,7 +260,7 @@ class SegmentationProxy():
 
 
 
-def runTestSample(args, extractOutputFunctor, filterFunctor):
+def runTestSample(args, extractOutputFunctor, filterFunctor, forceRecompute = False):
     segmentationProxy = SegmentationProxy(args,  resourcesFolderPath="semanticSegmentation")
     segmentationProxy.doInference(extractOutputFunctor, filterFunctor)
 

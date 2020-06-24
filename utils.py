@@ -9,12 +9,12 @@ import numpy as np
 
 def setup_logger(distributed_rank=0, filename="log.txt"):
     logger = logging.getLogger("Logger")
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.WARNING)
     # don't log results for the non-master process
     if distributed_rank > 0:
         return logger
     ch = logging.StreamHandler(stream=sys.stdout)
-    ch.setLevel(logging.DEBUG)
+    ch.setLevel(logging.WARNING)
     fmt = "[%(asctime)s %(levelname)s %(filename)s line %(lineno)d %(process)d] %(message)s"
     ch.setFormatter(logging.Formatter(fmt))
     logger.addHandler(ch)
