@@ -1,3 +1,9 @@
+# What I've done on top of the original code:
+
+ - Fixed inference with big images. I was getting OOO memory on GPU because of the last softmax layer numclasses x resolution was to big to fit even 11 GB. To fix this I split / resized the image the upscaled it, only if needed.
+ - Added --gpu parameter, if specified as -1 it will run fully on CPU. sometimes is faster if the batch size is small
+ - Created a SegmentationProxy component that handles management between an external component and segmentation inference process, i.e. have model reusal, filtering parameters, callbacks to the external component etc.
+
 # Semantic Segmentation on MIT ADE20K dataset in PyTorch
 
 This is a PyTorch implementation of semantic segmentation models on MIT ADE20K scene parsing dataset (http://sceneparsing.csail.mit.edu/).
