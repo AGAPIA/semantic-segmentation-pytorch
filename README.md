@@ -3,6 +3,10 @@
  - Fixed inference with big images. I was getting OOO memory on GPU because of the last softmax layer numclasses x resolution was to big to fit even 11 GB. To fix this I split / resized the image the upscaled it, only if needed.
  - Added --gpu parameter, if specified as -1 it will run fully on CPU. sometimes is faster if the batch size is small
  - Created a SegmentationProxy component that handles management between an external component and segmentation inference process, i.e. have model reusal, filtering parameters, callbacks to the external component etc.
+ 
+Installatio note: 
+ The model can be either downloaded using their below instructions OR using my public link here: https://fmiunibuc-my.sharepoint.com/:f:/g/personal/ciprian_paduraru_fmi_unibuc_ro/EikAhLDnPHNPt9CFYl7Xbc0BSvs00I07GuoVb4XFHwHoBQ?e=KbUlti
+ Just put the two files in semantic-segmentation-pytorch/ade20k-resnet50dilated-ppm_deepsup/ folder
 
 # Semantic Segmentation on MIT ADE20K dataset in PyTorch
 
