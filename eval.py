@@ -105,7 +105,8 @@ def evaluate(segmentation_module, loader, cfg, gpu):
 
 
 def main(cfg, gpu):
-    torch.cuda.set_device(gpu)
+    if not(gpu is None or gpu == "-1" or gpu == -1):
+        torch.cuda.set_device(gpu)
 
     # Network Builders
     net_encoder = ModelBuilder.build_encoder(
