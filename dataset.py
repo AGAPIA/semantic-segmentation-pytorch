@@ -267,7 +267,11 @@ class TestDataset(BaseDataset):
         this_record = self.list_sample[index]
         # load image
         image_path = this_record['fpath_img']
+
+        #print("ERROR while opening image path ", image_path)
+        #try:
         img = Image.open(image_path).convert('RGB')
+        #except:
 
         # resize images
         # to avoid rounding in network

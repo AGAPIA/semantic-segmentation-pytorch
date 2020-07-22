@@ -24,9 +24,13 @@ from . config import cfg
 import sys
 
 class SegmentationProxy():
-    def __init__(self, argsList, resourcesFolderPath):
+    def __init__(self, argsList):
+        # Setup the parameters
+        #-------------------------------------
+        args = self.parseArguments(argsList)
+
         # Setup some visualization local tables
-        dataPath = os.path.join(resourcesFolderPath, "data")
+        dataPath = os.path.join(args.resourcesFolderPath, "data")
         self.colors = loadmat(os.path.join(dataPath, "color150.mat"))['colors']
         self.names = {}
         with open(os.path.join(dataPath, 'object150_info.csv')) as f:
@@ -35,9 +39,8 @@ class SegmentationProxy():
             for row in reader:
                 self.names[int(row[0])] = row[5].split(";")[0]
 
-        # Setup the parameters
-        #-------------------------------------
-        args = self.parseArguments(argsList)
+        self.resourcesFolderPath = args.resourcesFolderPath
+
         assert LooseVersion(torch.__version__) >= LooseVersion('0.4.0'), \
             'PyTorch>=0.4.0 is required'
 
@@ -111,6 +114,14 @@ class SegmentationProxy():
             type=int,
             help="gpu id for evaluation"
         )
+
+        parser.add_argument(
+            "--resourcesFolderPath",
+            default=None,
+            type=str,
+            help="path to where metadata resources needed are"
+        )
+
         parser.add_argument(
             "opts",
             help="Modify config options using the command-line",
@@ -133,7 +144,9 @@ class SegmentationProxy():
         return aargs
 
     def initModel(self, cfg, gpu):
-        torch.cuda.set_device(gpu)
+        if gpu is not None and gpu >= 0 and gpu != "-1":
+            print("Setting gpu device to ", gpu, type(gpu))
+            torch.cuda.set_device(gpu)
 
         # Network Builders
         net_encoder = ModelBuilder.build_encoder(
@@ -155,6 +168,8 @@ class SegmentationProxy():
 
         self.cfg = cfg
         self.gpu = gpu
+        if self.gpu == "-1" or self.gpu == None:
+            self.gpu = -1
 
         # Dataset and Loader
         dataset_test = TestDataset(
@@ -191,14 +206,17 @@ class SegmentationProxy():
 
             with torch.no_grad():
                 scores = torch.zeros(1, cfg.DATASET.num_class, segSize[0], segSize[1])
-                scores = async_copy_to(scores, self.gpu)
+
+                if self.gpu != -1:
+                    scores = async_copy_to(scores, self.gpu)
 
                 for img in img_resized_list:
                     feed_dict = batch_data.copy()
                     feed_dict['img_data'] = img
                     del feed_dict['img_ori']
                     del feed_dict['info']
-                    feed_dict = async_copy_to(feed_dict, self.gpu)
+                    if self.gpu != -1:
+                        feed_dict = async_copy_to(feed_dict, self.gpu)
 
                     # forward pass
                     pred_tmp = self.segmentation_module(feed_dict, segSize=segSize)
@@ -261,7 +279,7 @@ class SegmentationProxy():
 
 
 def runTestSample(args, extractOutputFunctor, filterFunctor, forceRecompute = False):
-    segmentationProxy = SegmentationProxy(args,  resourcesFolderPath="semanticSegmentation")
+    segmentationProxy = SegmentationProxy(args)
     segmentationProxy.doInference(extractOutputFunctor, filterFunctor)
 
 if __name__ == '__main__':
